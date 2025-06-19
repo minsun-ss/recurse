@@ -5,18 +5,35 @@ import logging
 logger = logging.getLogger(__name__)
 
 class KVHandler(BaseHTTPRequestHandler):
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.kvstore = KVStore()
+
     def do_GET(self):
         path = urlparse(self.path)
+        output = f"Path: {path.path}, params: {path.params}, query: {path.query}"
 
-        self.send_response(200)
+        match path.path:
+            case "/get":
+                self.respond(200, output)
+            case "/set":
+                self.respond(200, output)
+            case _:
+                self.respond(200, "wat")
+
+    def respond(self, status: int, body: str):
+        self.send_response(status)
         self.send_header('Content-type', "text/html")
         self.end_headers()
-        output = f"Path: {path.path}, params: {path.params}, query: {path.query}"
-        self.wfile.write(output.encode())
+        self.wfile.write(body.encode())
+
 
 class KVStore:
-    def __init__(self, db_path: str):
-        self.db = db_path
+    _db = None
+
+    def __init__(self, db_path: str = "/tmp/random"):
+        if KVStore._db is None:
+           KVStore._db = db_path
 
     def get(self, key: str) -> str:
         """Retrieves value stored for the key.
@@ -42,6 +59,7 @@ class KVStore:
         pass
 
 if __name__ == "__main__":
-    print("Serving now on 8000...")
-    server = HTTPServer(("localhost", 4000), KVHandler)
+    port = 4000
+    print(f"Serving now on {port}...")
+    server = HTTPServer(("localhost", port), KVHandler)
     server.serve_forever()
