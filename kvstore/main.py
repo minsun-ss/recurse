@@ -11,22 +11,26 @@ class KVHandler(BaseHTTPRequestHandler):
 
     def do_GET(self):
         path = urlparse(self.path)
-        output = f"Path: {path.path}, params: {path.params}, query: {path.query}"
 
         match path.path:
             case "/get":
-                self.respond(200, output)
+                self.handle_kv(query = path.query)
             case "/set":
-                self.respond(200, output)
+                self.handle_kv(query = path.query)
             case _:
-                self.respond(200, "wat")
+                self.echo(200, f"Path: {path.path}, params: {path.params}, query: {path.query}")
 
-    def respond(self, status: int, body: str):
+    def echo(self, status: int, body: str):
         self.send_response(status)
         self.send_header('Content-type', "text/html")
         self.end_headers()
         self.wfile.write(body.encode())
 
+    def handle_kv(self, query: str):
+        self.send_response(200)
+        self.send_header('Content-type', "text/html")
+        self.end_headers()
+        self.wfile.write(query.encode())
 
 class KVStore:
     _db = None
