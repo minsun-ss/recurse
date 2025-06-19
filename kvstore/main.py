@@ -14,9 +14,9 @@ class KVHandler(BaseHTTPRequestHandler):
 
         match path.path:
             case "/get":
-                self.handle_kv(query = path.query)
+                self.handle_get(query = path.query)
             case "/set":
-                self.handle_kv(query = path.query)
+                self.handle_set(query = path.query)
             case _:
                 self.echo(200, f"Path: {path.path}, params: {path.params}, query: {path.query}")
 
@@ -26,11 +26,18 @@ class KVHandler(BaseHTTPRequestHandler):
         self.end_headers()
         self.wfile.write(body.encode())
 
-    def handle_kv(self, query: str):
+    def handle_get(self, query: str):
         self.send_response(200)
         self.send_header('Content-type', "text/html")
         self.end_headers()
         self.wfile.write(query.encode())
+
+    def handle_set(self, query: str):
+        self.send_response(200)
+        self.send_header('Content-type', "text/html")
+        self.end_headers()
+        self.wfile.write(query.encode())
+
 
 class KVStore:
     _db = None
